@@ -1,0 +1,186 @@
+openapi: 3.0.0
+info:
+    version: 1.0.0
+    title: SmartMeterAIAPI
+x-sfdc:
+    agent:
+        topic:
+            name: SmartMeterDataManagement
+            classificationDescription: This topic covers the management and retrieval of smart meter data through the SmartMeterAPI. It includes fetching meter readings, checking device status, retrieving alerts, and monitoring energy consumption. The agent will use this topic to handle user requests related to smart meter data without modifying any readings or device settings.
+            scope: Your job is to handle all requests related to retrieving, managing, and monitoring smart meter data, including meter readings, device status, and alerts.
+            instructions:
+                - |-
+                    Always ensure the smart meter ID is provided before retrieving data.
+                    Never modify meter readings; only retrieve and display them.
+                    If a user requests readings for a date range, validate that the end date is not before the start date.
+                    If an alert is detected for a smart meter, notify the user and provide possible troubleshooting steps.
+paths:
+    /meters:
+        get:
+            summary: Get list of smart meters
+            description: Retrieves all registered smart meters
+            responses:
+                '200':
+                    description: List of smart meters
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/SmartMeter'
+
+    /meters/{meterId}:
+        get:
+            summary: Get smart meter details
+            description: Retrieves details of a specific smart meter
+            parameters:
+                -
+                    name: meterId
+                    in: path
+                    required: true
+                    description: Unique identifier for the smart meter
+                    schema:
+                        type: string
+            responses:
+                '200':
+                    description: Smart meter details
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SmartMeter'
+                '404':
+                    description: Meter not found
+
+    /meters/{meterId}/readings:
+        get:
+            summary: Get meter readings
+            description: Retrieves recent readings from the specified smart meter
+            parameters:
+                -
+                    name: meterId
+                    in: path
+                    required: true
+                    description: Unique identifier for the smart meter
+                    schema:
+                        type: string
+                -
+                    name: startDate
+                    in: query
+                    required: false
+                    description: Start date for readings (YYYY-MM-DD)
+                    schema:
+                        type: string
+                        format: date
+                -
+                    name: endDate
+                    in: query
+                    required: false
+                    description: End date for readings (YYYY-MM-DD)
+                    schema:
+                        type: string
+                        format: date
+            responses:
+                '200':
+                    description: List of meter readings
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/MeterReading'
+                '404':
+                    description: Meter not found
+
+    /meters/{meterId}/alerts:
+        get:
+            summary: Get meter alerts
+            description: Retrieves any alerts associated with the smart meter
+            parameters:
+                -
+                    name: meterId
+                    in: path
+                    required: true
+                    description: Unique identifier for the smart meter
+                    schema:
+                        type: string
+            responses:
+                '200':
+                    description: List of alerts
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/MeterAlert'
+                '404':
+                    description: Meter not found
+
+components:
+    schemas:
+        SmartMeter:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: Unique identifier of the smart meter
+                location:
+                    type: string
+                    description: Location where the meter is installed
+                status:
+                    type: string
+                    enum: [ active, inactive, maintenance ]
+                    description: Current status of the meter
+            example:
+                id: "12345"
+                location: "123 Main St, Springfield"
+                status: "active"
+
+        MeterReading:
+            type: object
+            properties:
+                timestamp:
+                    type: string
+                    format: date-time
+                    description: Time of the reading
+                energyConsumed:
+                    type: number
+                    format: float
+                    description: Energy consumption in kWh
+                power:
+                    type: number
+                    format: float
+                    description: Current power usage in kW
+            example:
+                timestamp: "2025-03-09T12:00:00Z"
+                energyConsumed: 15.5
+                power: 3.2
+
+        MeterAlert:
+            type: object
+            properties:
+                timestamp:
+                    type: string
+                    format: date-time
+                    description: Time when the alert was triggered
+                type:
+                    type: string
+                    enum: [ overload, outage, tampering, low_voltage ]
+                    description: Type of alert
+                message:
+                    type: string
+                    description: Alert description
+            example:
+                timestamp: "2025-03-09T12:00:00Z"
+                type: "overload"
+                message: "The meter has detected an overload condition."
+
+tags:
+    -
+        name: Meters
+        description: Operations related to smart meters
+    -
+        name: Readings
+        description: Retrieve meter readings
+    -
+        name: Alerts
+        description: Monitor alerts from smart meters

@@ -1,0 +1,14 @@
+{
+  "main": "smartmeteraiapi.yaml",
+  "name": "SmartMeterAIAPI",
+  "classifier": "oas",
+  "organizationId": "7e6f8241-36d8-45cf-abb7-2048a629ae51",
+  "descriptorVersion": "1.0.0",
+  "groupId": "7e6f8241-36d8-45cf-abb7-2048a629ae51",
+  "assetId": "smartmeteraiapi",
+  "version": "1.0.0",
+  "tags": [
+    "sf-api-catalog",
+    "sf-api-topic"
+  ]
+}
